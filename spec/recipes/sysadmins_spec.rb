@@ -1,14 +1,8 @@
 require 'spec_helper'
 
 describe 'users::sysadmins' do
-
-  cached(:chef_run) do
-    ChefSpec::ServerRunner.new(
-      step_into: ['users_manage'],
-      platform: 'ubuntu',
-      version: '12.04'
-    ) do |node, server|
-     server.create_data_bag('users', {
+  before do
+    ChefSpec::Server.create_data_bag('users', {
       createme: {
         id: 'createme',
         groups: ['sysadmin'],
@@ -35,7 +29,14 @@ describe 'users::sysadmins' do
         groups: ['nonadmin'],
       },
     })
-    end.converge(described_recipe)
+  end
+
+  cached(:chef_run) do
+    ChefSpec::Runner.new(
+      step_into: ['users_manage'],
+      platform: 'ubuntu',
+      version: '12.04'
+    ).converge(described_recipe)
   end
 
   context 'Resource "users_manage"' do
